@@ -17,8 +17,12 @@ namespace IfStatements
         private const int MaxArgsPassed = 4; // Num of args in Consume
 
         private static int[] inputs;
+        private static int[] inputs_sequential;
+        private static int[] inputs_zeros;
 
         private static int s_seed;
+
+        private int[] _array;
 
         static void InitRand() {
             s_seed = 7774755;
@@ -31,9 +35,14 @@ namespace IfStatements
 
         public IfStatements()
         {
+            _array = new int[300];
             inputs = new int[Iterations + MaxArgsPassed];
+            inputs_sequential = new int[Iterations + MaxArgsPassed];
+            inputs_zeros = new int[Iterations + MaxArgsPassed];
             for (int i = 0; i < inputs.Length; i++) {
                 inputs[i] = Rand(ref s_seed) - 1;
+                inputs_sequential[i] = i;
+                inputs_zeros[i] = 0;
             }
         }
 
@@ -41,6 +50,11 @@ namespace IfStatements
         static void Consume(int op1, int op2, int op3, int op4) {
             return;
         }
+
+        /* Array is filled with random data.
+           Mod 2 in the first test gives roughly 50/50 split.
+           Each following test increases the mod, giving more weight to jumping over the condition.
+        */
 
         [Benchmark]
         public void Single() {
@@ -56,6 +70,374 @@ namespace IfStatements
             }
             Consume(op1, 0, 0, 0);
         }
+
+        [Benchmark]
+        public void Single3() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleInner3(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleInner3(int op1) {
+            if (op1 % 3 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+
+        [Benchmark]
+        public void Single4() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleInner4(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleInner4(int op1) {
+            if (op1 % 4 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void Single5() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleInner5(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleInner5(int op1) {
+            if (op1 % 5 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void Single6() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleInner6(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleInner6(int op1) {
+            if (op1 % 6 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        /* Array is filled with random data.
+           Mod 2 in the first test gives roughly 50/50 split.
+           Each following test increases the mod, giving more weight to executing the condition.
+        */
+
+        [Benchmark]
+        public void SingleRev() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleRevInner(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleRevInner(int op1) {
+            if (op1 % 2 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleRev3() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleRevInner3(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleRevInner3(int op1) {
+            if (op1 % 3 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+
+        [Benchmark]
+        public void SingleRev4() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleRevInner4(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleRevInner4(int op1) {
+            if (op1 % 4 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleRev5() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleRevInner5(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleRevInner5(int op1) {
+            if (op1 % 5 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleRev6() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleRevInner6(inputs[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleRevInner6(int op1) {
+            if (op1 % 6 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        /* Array is filled with sequential data.
+           Mod 2 in the first test gives exactly a 50/50 split.
+           Each following test increases the mod, giving more weight to jumping over the condition.
+           This gives a regular pattern of a single pass followed by multiple fail conditions.
+        */
+
+        [Benchmark]
+        public void SingleSeq() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqInner(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqInner(int op1) {
+            if (op1 % 2 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeq3() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqInner3(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqInner3(int op1) {
+            if (op1 % 3 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+
+        [Benchmark]
+        public void SingleSeq4() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqInner4(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqInner4(int op1) {
+            if (op1 % 4 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeq5() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqInner5(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqInner5(int op1) {
+            if (op1 % 5 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeq6() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqInner6(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqInner6(int op1) {
+            if (op1 % 6 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        /* Array is filled with sequential data.
+           Mod 2 in the first test gives exactly a 50/50 split.
+           Each following test increases the mod, giving more weight to executing the condition.
+           This gives a regular pattern of a single fail followed by multiple pass conditions.
+        */
+
+        [Benchmark]
+        public void SingleSeqRev() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqRevInner(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqRevInner(int op1) {
+            if (op1 % 2 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeqRev3() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqRevInner3(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqRevInner3(int op1) {
+            if (op1 % 3 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+
+        [Benchmark]
+        public void SingleSeqRev4() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqRevInner4(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqRevInner4(int op1) {
+            if (op1 % 4 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeqRev5() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqRevInner5(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqRevInner5(int op1) {
+            if (op1 % 5 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeqRev6() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqRevInner6(inputs_sequential[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqRevInner6(int op1) {
+            if (op1 % 6 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        /* Array is filled with zeros.
+           Jump is always taken or always not taken
+        */
+
+        [Benchmark]
+        public void SingleSeqAlways() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqAlwaysInner(inputs_zeros[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqAlwaysInner(int op1) {
+            if (op1 % 2 == 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+        [Benchmark]
+        public void SingleSeqAlwaysNever() {
+            for (int i = 0; i < Iterations; i++) {
+                SingleSeqAlwaysNeverInner(inputs_zeros[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SingleSeqAlwaysNeverInner(int op1) {
+            if (op1 % 2 != 0) {
+                op1 = 5;
+            }
+            Consume(op1, 0, 0, 0);
+        }
+
+
+
+
+        [Benchmark]
+        public void MoveNext() {
+            int index = 0;
+            for (int i = 0; i < Iterations; i++) {
+                MoveNextInner(ref index);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void MoveNextInner(ref int index)
+        {
+            // It is tempting to use the remainder operator here but it is actually much slower
+            // than a simple comparison and a rarely taken branch.
+            // JIT produces better code than with ternary operator ?:
+            int tmp = index + 1;
+            if (tmp == _array.Length)
+            {
+                tmp = 0;
+            }
+            index = tmp;
+        }
+
+
+
 
         [Benchmark]
         public void And() {
